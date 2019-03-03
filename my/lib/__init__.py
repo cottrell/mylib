@@ -6,7 +6,7 @@ _is_interactive = None
 def is_interactive_mode():
     global _is_interactive
     if _is_interactive is None:
-        _is_interactive = hasattr(main, '__file__')
+        _is_interactive = not hasattr(main, '__file__')
     return _is_interactive
 
 try:

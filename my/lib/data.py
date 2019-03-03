@@ -106,6 +106,8 @@ def discover_feature_hierarchy_in_df(df, cols, thresh=0.9):
     Try to establish a hierachy between the features. For example, detect that county -> district -> town.
 
     TODO: do more with the relative accuracies. This was just a quick hack. Use the dataframe "d" for complete bidirectional edges information.
+
+    TODO: do thresh outside of the expensive function. You want to fiddle with it.
     """
     tasks = list()
     for i in range(len(cols)):
@@ -137,8 +139,10 @@ def plot_transitive_reduction_of_condensation(edges):
     plt.ion()
     plt.subplot(211)
     nx.draw_networkx(ggg)
+    plt.title('condensation')
     plt.subplot(212)
     nx.draw_networkx(gggg)
     plt.tight_layout()
     plt.show()
+    plt.title('transitive reduction')
     return gggg
