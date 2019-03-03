@@ -1,6 +1,8 @@
 import sys
 import __main__ as main
 
+_is_interactive = None
+
 def is_interactive_mode():
     global _is_interactive
     if _is_interactive is None:
