@@ -1,4 +1,11 @@
 import sys
+import __main__ as main
+
+def is_interactive_mode():
+    global _is_interactive
+    if _is_interactive is None:
+        _is_interactive = hasattr(main, '__file__')
+    return _is_interactive
 
 try:
     _STUFF
@@ -19,6 +26,7 @@ def wak():
     name, _locals = _STUFF.pop()
     print("wak vars from {}".format(name))
     sys._getframe(-1).f_back.f_locals.update(_locals)
+
 
 def attributedict_from_locals(text_or_list_of_text=None):
     return dict_from_locals(text_or_list_of_text, attributedict=True, depth=1)
