@@ -10,7 +10,9 @@ def online_update(*, n, m1, m2, x):
     assert x.ndim == 1
     n += 1
     m1 += (x - m1) / n
-    x2 = np.atleast_2d(x) * np.atleast_2d(x).T
+    x_ = np.atleast_2d(x)
+    x2 = x_ * x_.T
+    assert x2.ndim == 2
     m2 = m2 + (x2 - m2) / n
     return n, m1, m2
 
