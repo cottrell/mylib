@@ -1,15 +1,15 @@
 """
 Stuff to do with reading and writing.
 """
-import pandas
-import re
-import inspect
-import pandas as pd
-import numpy
-import numpy as np
 import gzip
+import inspect
+import re
+
+import numpy as np
+import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+
 
 def get_capped_line_count(filename, n=2):
     i = 0
@@ -19,13 +19,17 @@ def get_capped_line_count(filename, n=2):
             break
     return i
 
+
 def _open(filename, **kwargs):
-    if filename.endswith('.gz'):
+    if filename.endswith(".gz"):
         return gzip.open(filename, **kwargs)
     else:
         return open(filename, **kwargs)
 
-parquet_options = {'compression': 'snappy'}
+
+parquet_options = {"compression": "snappy"}
+
+
 def append_to_parquet_table(dataframe, filepath=None, writer=None):
     """
     Example recipe:
@@ -36,7 +40,7 @@ def append_to_parquet_table(dataframe, filepath=None, writer=None):
 
     See: https://stackoverflow.com/questions/47113813/using-pyarrow-how-do-you-append-to-parquet-file
     """
-    assert (filepath is not None) or (writer is not None), 'filepath and writer can not both be None'
+    assert (filepath is not None) or (writer is not None), "filepath and writer can not both be None"
     table = pa.Table.from_pandas(dataframe)
     if writer is None:
         writer = pq.ParquetWriter(filepath, table.schema)

@@ -1,29 +1,33 @@
-import logging
-import functools
-import concurrent.futures
-import subprocess
-import time
-import pandas as pd
-import threading
-import contextlib
 import asyncio
 import collections
+import concurrent.futures
+import contextlib
+import functools
+import logging
 import os
+import subprocess
 import tempfile
+import threading
+import time
+
+import pandas as pd
+
 
 @contextlib.contextmanager
-def tempfile_then_atomic_move(filename, dir=None, prefix='.tmp_'):
+def tempfile_then_atomic_move(filename, dir=None, prefix=".tmp_"):
     if dir is None:
         dir = os.path.dirname(filename)
     if not os.path.exists(dir):
         os.makedirs(dir)
     temp = tempfile.mktemp(prefix=prefix, dir=dir)
     yield temp
-    print('atomic {} -> {}'.format(temp, filename))
+    print("atomic {} -> {}".format(temp, filename))
     os.rename(temp, filename)
+
 
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
 # https://docs.python.org/3/library/asyncio-subprocess.html
+
 
 def run_command_get_output(cmd, shell=True, splitlines=True, raise_exceptions=False):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
@@ -32,38 +36,43 @@ def run_command_get_output(cmd, shell=True, splitlines=True, raise_exceptions=Fa
     out = out.decode()
     err = err.decode()
     if splitlines:
-        out = out.split('\n')
-        err = err.split('\n')
+        out = out.split("\n")
+        err = err.split("\n")
     res = dict(out=out, err=err, status=status, cmd=cmd)
     if raise_exceptions and status != 0:
-        raise Exception('error running {}'.format(res))
+        raise Exception("error running {}".format(res))
     return res
 
-def convert_nan_to_none_inplace(df, na_value='None'):
-    for k in df:
-        if df[k].dtype.name in ('object', 'str'):
-            df[k] = df[k].fillna('None')
 
-def convert_to_categorical_inplace(df, thresh_hold=1000, na_value='None'):
+def convert_nan_to_none_inplace(df, na_value="None"):
     for k in df:
-        if df[k].dtype.name in ('object', 'str'):
-            df[k] = df[k].fillna('None')
+        if df[k].dtype.name in ("object", "str"):
+            df[k] = df[k].fillna("None")
+
+
+def convert_to_categorical_inplace(df, thresh_hold=1000, na_value="None"):
+    for k in df:
+        if df[k].dtype.name in ("object", "str"):
+            df[k] = df[k].fillna("None")
             if df[k].nunique() < thresh_hold:
-                df[k] = df[k].astype('category')
+                df[k] = df[k].astype("category")
+
 
 def dict_of_lists_to_dict(d):
     r = dict()
     for k, v in d.items():
         for x in v:
-            assert x not in r, 'clash {}'.format(x)
+            assert x not in r, "clash {}".format(x)
             r[x] = k
     return r
+
 
 def list_of_tuples_to_dict_of_lists(d):
     out = collections.defaultdict(list)
     for k, v in d:
         out[k].append(v)
     return dict(out)
+
 
 def invert_dict(d):
     r = dict()
@@ -74,13 +83,16 @@ def invert_dict(d):
     r = {k: sorted(v) for k, v in r.items()}
     return r
 
+
 def df_to_schema_tuples(df):
     return list(df.dtypes.map(lambda x: x.name).items())
+
 
 def apply_schema_to_df_inplace(df, schema):
     for k in df.columns:
         if df[k].dtype.name != schema[k]:
             df[k] = df[k].astype(schema[k])
+
 
 def schedule_coroutine(target, *, loop=None):
     """Schedules target coroutine in the given event loop
@@ -93,6 +105,7 @@ def schedule_coroutine(target, *, loop=None):
         return asyncio.ensure_future(target, loop=loop)
     raise TypeError("target must be a coroutine, not {!r}".format(type(target)))
 
+
 def run_in_background(non_co_callable, loop=None, executor=None):
     # not concellable
     if loop is None:
@@ -100,6 +113,7 @@ def run_in_background(non_co_callable, loop=None, executor=None):
     if callable(non_co_callable):
         return loop.run_in_executor(executor, non_co_callable)
     raise TypeError("target must be a callable, not {!r}".format(type(target)))
+
 
 def run_in_foreground(*tasks, loop=None):
     if loop is None:
@@ -114,6 +128,7 @@ def run_in_foreground(*tasks, loop=None):
         loop.run_forever()
         tasks.exception()
 
+
 def _wrapped_errors(task):
     @functools.wraps(task)
     def inner():
@@ -124,14 +139,18 @@ def _wrapped_errors(task):
         except Exception as e:
             exception = e
         return dict(exception=exception, result=result)
+
     return inner
+
 
 def test_wrapped_errors():
     def f():
         asdf
-        return 'nothing'
+        return "nothing"
+
     f = _wrapped_errors(f)
     return f()
+
 
 def run_tasks_in_parallel(*tasks, max_workers=10, wait=True, raise_exceptions=False):
     """ WARNING: raise_exceptions changes the return structure. maybe this is obvious """
@@ -148,8 +167,7 @@ def run_tasks_in_parallel(*tasks, max_workers=10, wait=True, raise_exceptions=Fa
         return fut
 
 
-class TimeLogger():
-
+class TimeLogger:
     def __init__(self, log=logging.warning):
         self.d = dict()
         self.log = log
@@ -161,20 +179,21 @@ class TimeLogger():
         yield
         end = time.time()
         interval = end - start
-        self.log("%f s : %s " % (interval, '-'.join(name)))
+        self.log("%f s : %s " % (interval, "-".join(name)))
         self.d[name] = [start, end, interval]
 
     def get_frame(self):
-        return pd.DataFrame(self.d, index=['start', 'stop', 'ellapsed']).T
+        return pd.DataFrame(self.d, index=["start", "stop", "ellapsed"]).T
 
     def clear(self):
         self.d = dict()
 
-class AttrDict(dict):
 
+class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
 
 def hashed_pandas_apply(s, fun):
     u = s.unique()
