@@ -10,6 +10,11 @@ from numpy.random import rand, randint
 
 from . import tools
 
+def bits_to_int(codes):
+    """ see np.unpackbits and packbits ... but those are for specific size only """
+    n = codes.shape[1]
+    x = 2 ** np.arange(n)[::-1]
+    return (codes @ x[:, None]).squeeze()
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return "".join(random.choice(chars) for _ in range(size))

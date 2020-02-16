@@ -3,6 +3,20 @@ import scipy.optimize as so
 import scipy.stats as ss
 
 
+import numba
+
+@numba.jit(nopython=True)
+def online_update(*, n, m1, m2, x):
+    """ m1 and m2 can be vector and matrix respectively! """
+    assert x.ndim == 1
+    n += 1
+    m1 += (x - m1) / n
+    x_ = np.atleast_2d(x)
+    x2 = x_ * x_.T
+    assert x2.ndim == 2
+    m2 = m2 + (x2 - m2) / n
+    return n, m1, m2
+
 def pareto_from_mean_median(mu, median):
     """
     scipy form has loc and scale.
