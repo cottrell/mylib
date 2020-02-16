@@ -6,7 +6,7 @@ import os
 import pickle
 import sys
 
-from .tools import run_command_get_output, tempfile_then_atomic_move
+from ..tools import run_command_get_output, tempfile_then_atomic_move
 
 # TODO copy stuff from git/libcache.py
 
