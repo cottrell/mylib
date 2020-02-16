@@ -11,6 +11,23 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 
+def write_df_to_arrow_rbf(df, path, preserve_index=False):
+    """ record batch file writer """
+    t = pa.Table.from_pandas(df, preserve_index=preserve_index)
+    w = pa.RecordBatchFileWriter(path, t.schema)
+    print(f'writing {df.shape[0]} rows to {path}')
+    w.write(t)
+    w.close()
+
+
+def read_arrow_rbf_to_df(path):
+    """ record batch file reader """
+    r = pa.RecordBatchFileReader(path)
+    print(f'reading {path}')
+    t = r.read_all()
+    return t.to_pandas()
+
+
 def get_capped_line_count(filename, n=2):
     i = 0
     for x in _open(filename):
